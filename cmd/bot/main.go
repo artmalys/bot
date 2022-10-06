@@ -4,14 +4,17 @@ import (
 	"log"
 	"os"
 
+	"github.com/artmalys/bot/internal/app/commands"
+	"github.com/artmalys/bot/internal/service/product"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/istrel/bot/internal/app/commands"
-	"github.com/istrel/bot/internal/service/product"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		log.Panic(err)
+	}
 
 	token := os.Getenv("TOKEN")
 

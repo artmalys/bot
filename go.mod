@@ -1,4 +1,4 @@
-module github.com/istrel/bot
+module github.com/artmalys/bot
 
 go 1.17
 
