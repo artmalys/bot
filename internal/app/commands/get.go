@@ -4,10 +4,10 @@ import (
 	"log"
 	"strconv"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tg "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func (c *Commander) Get(inputMessage *tgbotapi.Message) {
+func (c *Commander) Get(inputMessage *tg.Message) {
 	args := inputMessage.CommandArguments()
 
 	idx, err := strconv.Atoi(args)
@@ -15,17 +15,18 @@ func (c *Commander) Get(inputMessage *tgbotapi.Message) {
 		log.Println("wrong args", args)
 		return
 	}
-
-	product, err := c.productService.Get(idx)
-	if err != nil {
-		log.Printf("fail to get product with idx %d: %v", idx, err)
+	product, serviceErr := c.productService.Get(idx)
+	if serviceErr != nil {
+		log.Panic(serviceErr)
 		return
 	}
-
-	msg := tgbotapi.NewMessage(
+	msg := tg.NewMessage(
 		inputMessage.Chat.ID,
 		product.Title,
 	)
-
-	c.bot.Send(msg)
+	_, sendErr := c.bot.Send(msg)
+	if sendErr != nil {
+		log.Panic(sendErr)
+		return
+	}
 }

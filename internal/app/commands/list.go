@@ -1,31 +1,26 @@
 package commands
 
 import (
-	"encoding/json"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tg "github.com/go-telegram-bot-api/telegram-bot-api"
+	"log"
 )
 
-func (c *Commander) List(inputMessage *tgbotapi.Message) {
-	outputMsgText := "Here all the products: \n\n"
-
-	products := c.productService.List()
-	for _, p := range products {
-		outputMsgText += p.Title
-		outputMsgText += "\n"
+func (c *Commander) List(inputMessage *tg.Message) {
+	var keyboardButtons []tg.InlineKeyboardButton
+	for _, p := range c.productService.List() {
+		keyboardButtons = append(keyboardButtons,
+			tg.NewInlineKeyboardButtonData(p.Title, p.TextPrice()))
 	}
+	msg := tg.NewMessage(
+		inputMessage.Chat.ID,
+		"Hello, please choose a product!")
 
-	msg := tgbotapi.NewMessage(inputMessage.Chat.ID, outputMsgText)
+	msg.ReplyMarkup = tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(keyboardButtons...))
 
-	serializedData, _ := json.Marshal(CommandData{
-		Offset: 21,
-	})
-
-	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Next page", string(serializedData)),
-		),
-	)
-
-	c.bot.Send(msg)
+	_, err := c.bot.Send(msg)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
 }
